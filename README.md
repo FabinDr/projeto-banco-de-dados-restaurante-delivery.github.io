@@ -222,6 +222,9 @@ No modelo relacional, ambos são armazenados em uma única tabela FUNCIONARIO, c
 | registra | CLIENTE | (0,n) | (1,1) | AVALIACAO | Um cliente registra zero ou várias avaliações |
 | avalia | PEDIDO | (0,1) | (1,1) | AVALIACAO | Um pedido pode ter zero ou uma avaliação |
 
+## MER
+<img width="2071" height="1522" alt="mer_restaurante_delivery (2)" src="https://github.com/user-attachments/assets/54f8492d-3c18-4160-aaaf-448b8034a4e3" />
+
 ---
 
 ## 5. Mapeamento MER para Modelo Relacional
