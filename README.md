@@ -1,11 +1,11 @@
 # Projeto I — Banco de Dados
 ## Sistema: Restaurante Delivery
 
-**Universidade Federal do Maranhão — UFMA**  
-**Curso:** Bacharelado Interdisciplinar em Ciência e Tecnologia  
-**Disciplina:** Banco de Dados  
-**Professor:** Msc. Cláudio Aroucha  
-**Equipe:** Fabio, Brendo e Lara | 2026.1.1
+**Universidade Federal do Maranhão — UFMA** <br>
+**Curso:** Bacharelado Interdisciplinar em Ciência e Tecnologia <br>
+**Disciplina:** Banco de Dados <br>
+**Professor:** Cláudio Aroucha <br>
+**Equipe:** Fabio, Brendo e Lara | 2026.1
 
 ---
 
@@ -32,7 +32,7 @@ O sistema de banco de dados tem como objetivo gerenciar as operações de um **�
 | Ator | O que faz |
 |---|---|
 | Cliente | Cadastra-se, escolhe endereço, faz pedidos, paga e avalia |
-| Funcionário | Atende e prepara o pedido internamente |
+| Funcionário | Atende ou prepara o pedido internamente |
 | Entregador | Realiza a entrega usando um veículo cadastrado |
 
 ---
@@ -54,7 +54,7 @@ O sistema de banco de dados tem como objetivo gerenciar as operações de um **�
 | 11 | ENTREGA | Forte | Registro da operação de entrega |
 | 12 | AVALIACAO | Forte | Avaliação do cliente sobre o pedido recebido |
 
-> O atributo multivalorado `telefone` do CLIENTE gera uma 12ª tabela: `CLIENTE_TELEFONE`.
+> O atributo multivalorado `telefone` do CLIENTE gera uma 12ª tabela: `CLIENTE_TELEFONE`.<br>
 > Total de tabelas no modelo relacional: **12**.
 
 ---
@@ -186,7 +186,8 @@ O sistema de banco de dados tem como objetivo gerenciar as operações de um **�
 
 ## 4. Relacionamentos e Cardinalidades
 
-> Notacao: (minima, maxima) conforme padrao do Peter Chen.
+> Notacao: (minima, maxima) conforme padrao do Peter Chen.<br>
+> A cardinalidade e anotada no lado oposto da entidade a que se refere.
 
 | Relacionamento | Entidade A | Card. A | Card. B | Entidade B | Descricao |
 |---|---|---|---|---|---|
@@ -208,12 +209,12 @@ O sistema de banco de dados tem como objetivo gerenciar as operações de um **�
 
 ## 5. Mapeamento MER para Modelo Relacional
 
-> Entidade forte vira tabela propria. <br>
-> Entidade fraca vira tabela com PK composta. <br>
-> Relacionamento 1:1 com FK incorporada no lado participante. <br>
-> Relacionamento 1:N com FK no lado N. <br>
-> Relacionamento N:N vira tabela propria (ITEM_PEDIDO). <br>
-> Atributo multivalorado vira tabela separada (CLIENTE_TELEFONE). <br>
+> Entidade forte vira tabela propria.<br>
+> Entidade fraca vira tabela com PK composta.<br>
+> Relacionamento 1:1 com FK incorporada no lado participante.<br>
+> Relacionamento 1:N com FK no lado N.<br>
+> Relacionamento N:N vira tabela propria (ITEM_PEDIDO).<br>
+> Atributo multivalorado vira tabela separada (CLIENTE_TELEFONE).<br>
 
 ```
 CLIENTE(id_cliente, nome, email, cpf, data_cadastro)
@@ -379,3 +380,14 @@ Nao possui atributos alem da propria PK. Sem risco de dependencia parcial.
 | preco_unitario em ITEM_PEDIDO | O preco do produto pode mudar; o preco da compra deve ser preservado no historico |
 
 ---
+
+*Projeto I — Banco de Dados | UFMA — BICT | 2026.1*
+
+---
+## Observacao sobre FUNCIONARIO
+
+FUNCIONARIO utiliza **especializacao parcial e exclusiva** (p, d):
+
+- **Parcial (p):** nem todo funcionario precisa ser classificado como atendente ou cozinheiro (pode haver outros cargos futuramente)<br>
+- **Disjunta (d):** um funcionario e atendente OU cozinheiro — nunca os dois<br>
+
