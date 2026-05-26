@@ -51,7 +51,7 @@ O sistema de banco de dados tem como objetivo gerenciar as operações de um **�
 <img width="2164" height="1130" alt="mer" src="https://github.com/user-attachments/assets/d9e16f1d-72e6-46c1-bf90-60f8a118db95" />
 
 ---
-## 4. Esquema Relacional Completo
+## 2. Esquema Relacional Completo
 
 ```sql
 CLIENTE(id_cliente, nome, email, cpf, data_cad.)
