@@ -22,11 +22,12 @@ O sistema de banco de dados tem como objetivo gerenciar as operações de um **�
 
 **Realizando um pedido:** O cliente escolhe um ou mais produtos e confirma o pedido, selecionando o endereço de entrega. O pedido é registrado com data, hora, valor total e seu status atual, que é consultado de uma tabela de domínio (`STATUS_PEDIDO`). Os produtos selecionados formam os itens do pedido (`ITEM_PEDIDO`), armazenados com quantidade, preço unitário no momento da compra e observações opcionais (ex.: sem cebola). Um funcionário interno (atendente) é responsável por receber e encaminhar o pedido.
 
-**Funcionários — Especialização (t, d):** O restaurante possui dois tipos de funcionários internos, modelados por meio de uma **especialização total e exclusiva (t, d)** no MER de Peter Chen. No modelo relacional, essa herança foi mapeada criando-se uma tabela genérica e uma tabela para cada especialidade:
+**Funcionários — Especialização (p, d):** O restaurante possui funcionários modelados por meio de uma **especialização parcial e exclusiva (p, d)** no MER de Peter Chen. Por ser parcial, significa que o restaurante pode ter funcionários genéricos que não se encaixam nas subclasses, além dos especializados. No modelo relacional, essa herança foi mapeada criando-se uma tabela genérica e uma tabela para cada especialidade:
 
-* **Funcionário:** Tabela base contendo dados comuns (id, nome, data de admissão).
+* **Funcionário:** Tabela base contendo dados comuns a todos os funcionários (id, nome, data de admissão).
 * **Atendente:** Recebe e confirma pedidos. Tabela própria vinculada ao funcionário, contendo o atributo específico `turno` (manhã, tarde ou noite).
 * **Cozinheiro:** Prepara os pedidos. Tabela própria vinculada ao funcionário, contendo o atributo específico `especialidade` (ex.: grelhados, massas).
+* **Entregador:** Realiza as entregas dos pedidos. Tabela própria vinculada ao funcionário, contendo atributos específicos como `cpf`, `telefone` e status de `disponivel`, além de estar associado ao veículo que utiliza nas entregas.
 
 **Pagamento:** Cada pedido gera exatamente um registro de pagamento. O pagamento armazena o método escolhido, o valor, a data/hora e o status da transação, que é referenciado por meio de uma tabela de domínio (`STATUS_PAGAMENTO`).
 
@@ -45,7 +46,113 @@ O sistema de banco de dados tem como objetivo gerenciar as operações de um **�
 
 ---
 
-## 2. Entidades
+## 1.1 Modelagem entidade Relacionamento
+
+<img width="2164" height="1130" alt="mer" src="https://github.com/user-attachments/assets/d9e16f1d-72e6-46c1-bf90-60f8a118db95" />
+
+---
+## 4. Esquema Relacional Completo
+
+```sql
+CLIENTE(id_cliente, nome, email, cpf, data_cad.)
+  PK (id_cliente)
+
+CLIENTE_TELEFONE(id_cliente, telefone)
+  PK (id_cliente, telefone)
+  FK (id_cliente) → CLIENTE
+
+ENDERECO(id_endereco, id_cliente, logradouro, numero, complement., bairro, cep)
+  PK (id_endereco)
+  FK (id_cliente) → CLIENTE
+
+CATEGORIA(id_categoria, nome, descricao)
+  PK (id_categoria)
+
+PRODUTO(id_produto, id_categoria, nome, descricao, preco, disponivel)
+  PK (id_produto)
+  FK (id_categoria) → CATEGORIA
+
+FUNCIONARIO(id_funcionario, nome, data_adm.)
+  PK (id_funcionario)
+
+ATENDENTE(id_funcionario, turno)
+  PK (id_funcionario)
+  FK (id_funcionario) → FUNCIONARIO
+
+COZINHEIRO(id_funcionario, especialidade)
+  PK (id_funcionario)
+  FK (id_funcionario) → FUNCIONARIO
+
+STATUS_PEDIDO(id_status_pedido, descricao)
+  PK (id_status_pedido)
+
+PEDIDO(id_pedido, id_cliente, id_endereco, id_funcionario, id_status_pedido, data_hora, descricao, total)
+  PK (id_pedido)
+  FK (id_cliente)      → CLIENTE
+  FK (id_endereco)     → ENDERECO
+  FK (id_funcionario)  → ATENDENTE
+  FK (id_status_pedido)→ STATUS_PEDIDO
+
+ITEM_PEDIDO(id_pedido, id_produto, quantidade, preco_unit., observacao)
+  PK (id_pedido, id_produto)
+  FK (id_pedido)  → PEDIDO
+  FK (id_produto) → PRODUTO
+
+STATUS_PAGAMENTO(id_status_pagamento, descricao)
+  PK (id_status_pagamento)
+
+PAGAMENTO(id_pagamento, id_pedido, id_status_pagamento, metodo, data_hora, valor)
+  PK (id_pagamento)
+  FK (id_pedido)           → PEDIDO
+  FK (id_status_pagamento) → STATUS_PAGAMENTO
+
+VEICULO(id_veiculo, tipo, placa, marca, modelo, ano)
+  PK (id_veiculo)
+
+ENTREGADOR(id_entregador, id_veiculo, cpf, disponivel)
+  PK (id_entregador)
+  FK (id_veiculo) → VEICULO
+
+ENTREGA(id_entrega, id_pedido, id_entregador, hora_saida, hora_entrega, status_entrega)
+  PK (id_entrega)
+  FK (id_pedido)     → PEDIDO
+  FK (id_entregador) → ENTREGADOR
+
+AVALIACAO(id_avaliacao, id_cliente, id_pedido, nota, comentario, data_hora)
+  PK (id_avaliacao)
+  FK (id_cliente) → CLIENTE
+  FK (id_pedido)  → PEDIDO
+
+```
+
+---
+## 3. Normalização até a 3ª Forma Normal (3FN)
+
+### 3.1 Primeira Forma Normal (1FN)
+
+Para garantir atributos atômicos e a ausência de grupos repetitivos:
+
+* O atributo composto `endereço` foi decomposto em colunas atômicas na tabela `ENDERECO`.
+* O atributo multivalorado `telefone` foi alocado em uma tabela dedicada (`CLIENTE_TELEFONE`).
+* Todos os registros possuem chave primária.
+
+### 3.2 Segunda Forma Normal (2FN)
+
+Aplica-se às tabelas com PK composta (`ITEM_PEDIDO`). Todos os atributos não-chave (`quantidade`, `preco_unit.`, `observacao`) dependem da combinação total da chave `(id_pedido, id_produto)`. Não há dependência de apenas uma parte da chave.
+
+### 3.3 Terceira Forma Normal (3FN)
+
+Para eliminar dependências transitivas e garantir integridade de domínio:
+
+* **Status Isolados:** A criação de `STATUS_PEDIDO` e `STATUS_PAGAMENTO` remove a vulnerabilidade de inconsistência de texto livre ou falhas em ENUMs rígidos. O status depende exclusivamente da sua chave de domínio.
+* **Especialização (Tabelas Separadas):** Os dados específicos de `ATENDENTE` e `COZINHEIRO` foram separados em tabelas próprias. Isso evita a existência de colunas com valores nulos constantes na tabela genérica de `FUNCIONARIO`, respeitando puramente o conceito relacional.
+* **Veículo:** Os dados do veículo continuam em uma tabela forte separada, evitando a dependência `id_entregador → id_veiculo → placa`.
+
+> **Conclusão:** O esquema de 17 tabelas atende plenamente aos requisitos da Terceira Forma Normal (3FN).
+
+---
+
+## 4. Entidades
 
 O modelo relacional final é composto por **17 tabelas** para garantir a adequada normalização e mapeamento correto das entidades e atributos do MER.
 
@@ -71,7 +178,7 @@ O modelo relacional final é composto por **17 tabelas** para garantir a adequad
 
 ---
 
-## 3. Atributos por Tabela
+## 5. Atributos por Tabela
 
 ### Tabelas de Cliente e Endereço
 
@@ -250,127 +357,3 @@ O modelo relacional final é composto por **17 tabelas** para garantir a adequad
 | nota | Inteiro | 1 a 5 |
 | comentario | Texto | Opcional |
 | data_hora | Data/Hora | — |
-
-
-<img width="2164" height="1130" alt="mer" src="https://github.com/user-attachments/assets/d9e16f1d-72e6-46c1-bf90-60f8a118db95" />
-
----
-
-## 4. Esquema Relacional Completo
-
-```sql
-CLIENTE(id_cliente, nome, email, cpf, data_cad.)
-  PK (id_cliente)
-
-CLIENTE_TELEFONE(id_cliente, telefone)
-  PK (id_cliente, telefone)
-  FK (id_cliente) → CLIENTE
-
-ENDERECO(id_endereco, id_cliente, logradouro, numero, complement., bairro, cep)
-  PK (id_endereco)
-  FK (id_cliente) → CLIENTE
-
-CATEGORIA(id_categoria, nome, descricao)
-  PK (id_categoria)
-
-PRODUTO(id_produto, id_categoria, nome, descricao, preco, disponivel)
-  PK (id_produto)
-  FK (id_categoria) → CATEGORIA
-
-FUNCIONARIO(id_funcionario, nome, data_adm.)
-  PK (id_funcionario)
-
-ATENDENTE(id_funcionario, turno)
-  PK (id_funcionario)
-  FK (id_funcionario) → FUNCIONARIO
-
-COZINHEIRO(id_funcionario, especialidade)
-  PK (id_funcionario)
-  FK (id_funcionario) → FUNCIONARIO
-
-STATUS_PEDIDO(id_status_pedido, descricao)
-  PK (id_status_pedido)
-
-PEDIDO(id_pedido, id_cliente, id_endereco, id_funcionario, id_status_pedido, data_hora, descricao, total)
-  PK (id_pedido)
-  FK (id_cliente)      → CLIENTE
-  FK (id_endereco)     → ENDERECO
-  FK (id_funcionario)  → ATENDENTE
-  FK (id_status_pedido)→ STATUS_PEDIDO
-
-ITEM_PEDIDO(id_pedido, id_produto, quantidade, preco_unit., observacao)
-  PK (id_pedido, id_produto)
-  FK (id_pedido)  → PEDIDO
-  FK (id_produto) → PRODUTO
-
-STATUS_PAGAMENTO(id_status_pagamento, descricao)
-  PK (id_status_pagamento)
-
-PAGAMENTO(id_pagamento, id_pedido, id_status_pagamento, metodo, data_hora, valor)
-  PK (id_pagamento)
-  FK (id_pedido)           → PEDIDO
-  FK (id_status_pagamento) → STATUS_PAGAMENTO
-  UNIQUE (id_pedido)
-
-VEICULO(id_veiculo, tipo, placa, marca, modelo, ano)
-  PK (id_veiculo)
-  UNIQUE (placa)
-
-ENTREGADOR(id_entregador, id_veiculo, cpf, disponivel)
-  PK (id_entregador)
-  FK (id_veiculo) → VEICULO
-
-ENTREGA(id_entrega, id_pedido, id_entregador, hora_saida, hora_entrega, status_entrega)
-  PK (id_entrega)
-  FK (id_pedido)     → PEDIDO
-  FK (id_entregador) → ENTREGADOR
-  UNIQUE (id_pedido)
-
-AVALIACAO(id_avaliacao, id_cliente, id_pedido, nota, comentario, data_hora)
-  PK (id_avaliacao)
-  FK (id_cliente) → CLIENTE
-  FK (id_pedido)  → PEDIDO
-  UNIQUE (id_pedido)
-
-```
-
----
-
-## 5. Normalização até a 3ª Forma Normal (3FN)
-
-### 5.1 Primeira Forma Normal (1FN)
-
-Para garantir atributos atômicos e a ausência de grupos repetitivos:
-
-* O atributo composto `endereço` foi decomposto em colunas atômicas na tabela `ENDERECO`.
-* O atributo multivalorado `telefone` foi alocado em uma tabela dedicada (`CLIENTE_TELEFONE`).
-* Todos os registros possuem chave primária.
-
-### 5.2 Segunda Forma Normal (2FN)
-
-Aplica-se às tabelas com PK composta (`ITEM_PEDIDO`). Todos os atributos não-chave (`quantidade`, `preco_unit.`, `observacao`) dependem da combinação total da chave `(id_pedido, id_produto)`. Não há dependência de apenas uma parte da chave.
-
-### 5.3 Terceira Forma Normal (3FN)
-
-Para eliminar dependências transitivas e garantir integridade de domínio:
-
-* **Status Isolados:** A criação de `STATUS_PEDIDO` e `STATUS_PAGAMENTO` remove a vulnerabilidade de inconsistência de texto livre ou falhas em ENUMs rígidos. O status depende exclusivamente da sua chave de domínio.
-* **Especialização (Tabelas Separadas):** Os dados específicos de `ATENDENTE` e `COZINHEIRO` foram separados em tabelas próprias. Isso evita a existência de colunas com valores nulos constantes na tabela genérica de `FUNCIONARIO`, respeitando puramente o conceito relacional.
-* **Veículo:** Os dados do veículo continuam em uma tabela forte separada, evitando a dependência `id_entregador → id_veiculo → placa`.
-
-> **Conclusão:** O esquema de 17 tabelas atende plenamente aos requisitos da Terceira Forma Normal (3FN).
-
----
-
-## 6. Justificativas das Decisões de Projeto
-
-| Decisão | Justificativa |
-| --- | --- |
-| Especialização em 3 tabelas | Uma tabela genérica (`FUNCIONARIO`) e duas específicas (`ATENDENTE` e `COZINHEIRO`) resolvem a herança (t,d) sem gerar valores nulos. Facilita manutenções exclusivas de escopo de cargo. |
-| Tabelas de Status | Isolar `STATUS_PEDIDO` e `STATUS_PAGAMENTO` permite a inclusão de novos status futuros sem necessidade de comandos de alteração estrutural (ALTER TABLE) no banco, melhorando a escabilidade. |
-| ITEM_PEDIDO como entidade fraca | Resolve a relação N:N entre PEDIDO e PRODUTO, armazenando o preço histórico da compra, desvinculado de flutuações futuras no cardápio. |
-| UNIQUE em id_pedido | Aplicado em PAGAMENTO, ENTREGA e AVALIACAO. Implementa fisicamente a restrição de cardinalidade máxima 1, evitando duplicações lógicas no ciclo de vida do pedido. |
-
----
-
-*Projeto I — Banco de Dados | UFMA — BICT | 2026.1*
