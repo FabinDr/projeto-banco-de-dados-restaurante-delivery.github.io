@@ -251,9 +251,10 @@ O modelo relacional final é composto por **17 tabelas** para garantir a adequad
 | comentario | Texto | Opcional |
 | data_hora | Data/Hora | — |
 
----
-<img width="2164" height="1130" alt="mer" src="https://github.com/user-attachments/assets/972d652d-c827-45d0-b7ae-da13c51e38da" />
 
+<img width="2164" height="1130" alt="mer" src="https://github.com/user-attachments/assets/d9e16f1d-72e6-46c1-bf90-60f8a118db95" />
+
+---
 
 ## 4. Esquema Relacional Completo
 
