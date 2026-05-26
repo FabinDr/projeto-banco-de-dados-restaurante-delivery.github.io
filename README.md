@@ -1,11 +1,12 @@
 # Projeto I — Banco de Dados
+
 ## Sistema: Restaurante Delivery
 
 **Universidade Federal do Maranhão — UFMA** <br>
-**Curso:** Bacharelado Interdisciplinar em Ciência e Tecnologia<br>
-**Disciplina:** Banco de Dados<br>
-**Professor:** Msc. Cláudio Aroucha<br>
-**Equipe:** Fabio, Brendo e Lara | 2026.1<br>
+**Curso:** Bacharelado Interdisciplinar em Ciência e Tecnologia <br>
+**Disciplina:** Banco de Dados <br>
+**Professor:** Msc. Cláudio Aroucha <br>
+**Equipe:** Fabio, Brendo e Lara | 2026.1 <br>
 
 ---
 
@@ -13,96 +14,112 @@
 
 O sistema de banco de dados tem como objetivo gerenciar as operações de um **único restaurante** que trabalha exclusivamente no modelo **delivery**. O restaurante possui um cardápio próprio com produtos organizados por categorias, atende clientes por meio de pedidos online e conta com uma equipe de funcionários internos e entregadores para realizar as operações.
 
-### Como funciona, passo a passo:
+### Como funciona, passo a passo
 
-**Cadastro do cliente:** O cliente se cadastra informando nome, e-mail e CPF. Ele pode registrar múltiplos endereços de entrega e um ou mais telefones de contato. O telefone é tratado como atributo multivalorado, gerando uma tabela separada no modelo relacional.
+**Cadastro do cliente:** O cliente se cadastra informando nome, e-mail e CPF. Ele pode registrar múltiplos endereços de entrega e um ou mais telefones de contato. O telefone é tratado como atributo multivalorado — representado por elipse dupla no MER — e gera uma tabela separada (`CLIENTE_TELEFONE`) no modelo relacional.
 
-**Cardápio:** O restaurante organiza seus produtos em categorias (ex.: Lanches, Bebidas, Sobremesas, Pratos). Cada produto pertence a uma única categoria e possui nome, descrição, preço e status de disponibilidade.
+**Cardápio:** O restaurante organiza seus produtos em categorias (ex.: Lanches, Bebidas, Sobremesas, Pratos). Cada produto pertence a exatamente uma categoria e possui nome, descrição, preço e status de disponibilidade (ativo/inativo).
 
-**Realizando um pedido:** O cliente escolhe um ou mais produtos e confirma o pedido, selecionando o endereço de entrega. O pedido é registrado com data, hora e status (aguardando, em preparo, saiu para entrega, entregue). Os produtos selecionados formam os itens do pedido — registrados com quantidade, preço unitário no momento da compra e observações (ex.: sem cebola). Um funcionário interno é responsável por atender e encaminhar o pedido.
+**Realizando um pedido:** O cliente escolhe um ou mais produtos e confirma o pedido, selecionando o endereço de entrega. O pedido é registrado com data, hora, valor total e seu status atual, que é consultado de uma tabela de domínio (`STATUS_PEDIDO`). Os produtos selecionados formam os itens do pedido (`ITEM_PEDIDO`), armazenados com quantidade, preço unitário no momento da compra e observações opcionais (ex.: sem cebola). Um funcionário interno (atendente) é responsável por receber e encaminhar o pedido.
 
-**Funcionários:** O restaurante possui dois tipos de funcionários internos, modelados por meio de uma especialização parcial e exclusiva (p, d):
-- **Atendente:** recebe e confirma pedidos. Possui atributo próprio: turno (manhã, tarde ou noite).
-- **Cozinheiro:** prepara os pedidos. Possui atributo próprio: especialidade (ex.: grelhados, massas).
-No modelo relacional, ambos são armazenados em uma única tabela FUNCIONARIO, com as colunas turno e especialidade preenchidas conforme o cargo — e nulas quando não se aplicam.
+**Funcionários — Especialização (t, d):** O restaurante possui dois tipos de funcionários internos, modelados por meio de uma **especialização total e exclusiva (t, d)** no MER de Peter Chen. No modelo relacional, essa herança foi mapeada criando-se uma tabela genérica e uma tabela para cada especialidade:
 
-**Pagamento:** Cada pedido gera exatamente um registro de pagamento, com o método escolhido (Pix, cartão de crédito, cartão de débito ou dinheiro), valor e status (pendente, confirmado ou estornado).
+* **Funcionário:** Tabela base contendo dados comuns (id, nome, data de admissão).
+* **Atendente:** Recebe e confirma pedidos. Tabela própria vinculada ao funcionário, contendo o atributo específico `turno` (manhã, tarde ou noite).
+* **Cozinheiro:** Prepara os pedidos. Tabela própria vinculada ao funcionário, contendo o atributo específico `especialidade` (ex.: grelhados, massas).
 
-**Entrega:** Quando o pedido está pronto, ele é atribuído a um entregador. Cada entregador possui um veículo cadastrado — modelado como entidade separada — com tipo (moto, bicicleta ou carro), placa, marca, modelo e ano. A entrega é registrada com horário de saída, horário de chegada e status (em rota, entregue, falhou).
+**Pagamento:** Cada pedido gera exatamente um registro de pagamento. O pagamento armazena o método escolhido, o valor, a data/hora e o status da transação, que é referenciado por meio de uma tabela de domínio (`STATUS_PAGAMENTO`).
 
-**Avaliação:** Após receber o pedido, o cliente pode registrar uma avaliação com nota de 1 a 5 estrelas e um comentário opcional. A avaliação está vinculada ao pedido, garantindo que somente clientes que realizaram um pedido possam avaliá-lo.
+**Entrega:** Quando o pedido está pronto, ele é atribuído a um entregador. Cada entregador possui um veículo cadastrado — modelado como entidade forte separada — com tipo (moto, bicicleta ou carro), placa, marca, modelo e ano. A entrega é registrada com horário de saída, horário de chegada e status (em rota, entregue, falhou).
 
-### Atores do sistema:
+**Avaliação:** Após receber o pedido, o cliente pode registrar uma avaliação com nota de 1 a 5 estrelas e um comentário opcional. A avaliação está vinculada diretamente ao pedido, garantindo que somente clientes que realizaram um pedido possam avaliá-lo.
+
+### Atores do sistema
 
 | Ator | O que faz |
-|---|---|
-| Cliente | Cadastra-se, escolhe endereço, faz pedidos, paga e avalia |
-| Atendente | Recebe e confirma o pedido internamente (turno) |
-| Cozinheiro | Prepara o pedido (especialidade) |
+| --- | --- |
+| Cliente | Cadastra-se, registra endereços e telefones, faz pedidos, paga e avalia |
+| Atendente | Recebe e confirma o pedido internamente |
+| Cozinheiro | Prepara o pedido |
 | Entregador | Realiza a entrega usando um veículo cadastrado |
 
 ---
 
-## 2. Entidades (12 entidades — 13 tabelas no modelo relacional)
+## 2. Entidades
 
-| # | Entidade | Tipo | O que representa |
-|---|---|---|---|
+O modelo relacional final é composto por **17 tabelas** para garantir a adequada normalização e mapeamento correto das entidades e atributos do MER.
+
+| # | Tabela | Tipo | O que representa |
+| --- | --- | --- | --- |
 | 1 | CLIENTE | Forte | Pessoa que realiza pedidos no restaurante |
-| 2 | ENDERECO | Forte | Endereços de entrega cadastrados pelo cliente |
-| 3 | CATEGORIA | Forte | Categoria dos produtos do cardápio |
-| 4 | PRODUTO | Forte | Item disponível no cardápio |
-| 5 | FUNCIONARIO | Forte | Funcionário interno com especialização (atendente/cozinheiro) |
-| 6 | PEDIDO | Forte | Pedido realizado por um cliente |
-| 7 | ITEM_PEDIDO | **Fraca** | Produto dentro de um pedido (relacionamento N:N com atributos) |
-| 8 | PAGAMENTO | Forte | Registro do pagamento de um pedido |
-| 9 | VEICULO | Forte | Veículo utilizado pelo entregador nas entregas |
-| 10 | ENTREGADOR | Forte | Responsável por realizar as entregas |
-| 11 | ENTREGA | Forte | Registro da operação de entrega |
-| 12 | AVALIACAO | Forte | Avaliação do cliente sobre o pedido recebido |
-
-> O atributo multivalorado `telefone` do CLIENTE gera uma 13ª tabela: `CLIENTE_TELEFONE`.
-> Total de tabelas no modelo relacional: **13**.
+| 2 | CLIENTE_TELEFONE | Multivalorado | Telefones de contato do cliente |
+| 3 | ENDERECO | Forte | Endereços de entrega cadastrados pelo cliente |
+| 4 | CATEGORIA | Forte | Categoria dos produtos do cardápio |
+| 5 | PRODUTO | Forte | Item disponível no cardápio |
+| 6 | FUNCIONARIO | Forte | Entidade genérica de funcionários internos |
+| 7 | ATENDENTE | Subclasse | Funcionário especializado no atendimento |
+| 8 | COZINHEIRO | Subclasse | Funcionário especializado no preparo |
+| 9 | STATUS_PEDIDO | Domínio | Catálogo de estados possíveis para um pedido |
+| 10 | PEDIDO | Forte | Pedido realizado por um cliente |
+| 11 | ITEM_PEDIDO | Fraca | Produto dentro de um pedido |
+| 12 | STATUS_PAGAMENTO | Domínio | Catálogo de estados possíveis para um pagamento |
+| 13 | PAGAMENTO | Fraca | Registro de pagamento de um pedido |
+| 14 | VEICULO | Forte | Veículo utilizado pelo entregador nas entregas |
+| 15 | ENTREGADOR | Forte | Responsável por realizar as entregas |
+| 16 | ENTREGA | Forte | Registro da operação de entrega |
+| 17 | AVALIACAO | Forte | Avaliação do cliente sobre o pedido recebido |
 
 ---
 
-## 3. Atributos de cada entidade
+## 3. Atributos por Tabela
 
-#### CLIENTE
+### Tabelas de Cliente e Endereço
+
+**CLIENTE**
+
 | Atributo | Tipo | Observação |
-|---|---|---|
+| --- | --- | --- |
 | **id_cliente** | Inteiro | Chave Primária |
 | nome | Texto | — |
 | email | Texto | Único |
 | cpf | Texto(11) | Único |
-| data_cadastro | Data | — |
-| telefone | Texto | **Multivalorado** → vira tabela CLIENTE_TELEFONE |
+| data_cad. | Data | Data de cadastro |
 
-> `telefone` é um atributo multivalorado: um cliente pode ter vários números. No MER é representado por elipse dupla. No modelo relacional vira tabela separada.
+**CLIENTE_TELEFONE**
 
-#### ENDERECO
 | Atributo | Tipo | Observação |
-|---|---|---|
+| --- | --- | --- |
+| **id_cliente** | Inteiro | PK Composta e FK → CLIENTE |
+| **telefone** | Texto | PK Composta |
+
+**ENDERECO**
+
+| Atributo | Tipo | Observação |
+| --- | --- | --- |
 | **id_endereco** | Inteiro | Chave Primária |
 | id_cliente | Inteiro | FK → CLIENTE |
-| rua | Texto | Parte do atributo composto `endereco` |
-| numero | Texto | Parte do atributo composto `endereco` |
-| bairro | Texto | Parte do atributo composto `endereco` |
-| cidade | Texto | Parte do atributo composto `endereco` |
-| cep | Texto(8) | Parte do atributo composto `endereco` |
-| complemento | Texto | Opcional |
+| logradouro | Texto | — |
+| numero | Texto | — |
+| complement. | Texto | — |
+| bairro | Texto | — |
+| cep | Texto | — |
 
-> O atributo composto `endereco` foi decomposto em atributos simples para garantir a 1FN.
+---
 
-#### CATEGORIA
+### Tabelas de Produto e Categoria
+
+**CATEGORIA**
+
 | Atributo | Tipo | Observação |
-|---|---|---|
+| --- | --- | --- |
 | **id_categoria** | Inteiro | Chave Primária |
-| nome | Texto | ex.: Lanches, Bebidas, Sobremesas |
+| nome | Texto | ex.: Lanches, Bebidas |
 | descricao | Texto | — |
 
-#### PRODUTO
+**PRODUTO**
+
 | Atributo | Tipo | Observação |
-|---|---|---|
+| --- | --- | --- |
 | **id_produto** | Inteiro | Chave Primária |
 | id_categoria | Inteiro | FK → CATEGORIA |
 | nome | Texto | — |
@@ -110,310 +127,248 @@ No modelo relacional, ambos são armazenados em uma única tabela FUNCIONARIO, c
 | preco | Decimal | — |
 | disponivel | Booleano | Ativo/inativo no cardápio |
 
-#### FUNCIONARIO *(com especialização parcial e exclusiva)*
+---
+
+### Tabelas de Funcionários (Especialização)
+
+**FUNCIONARIO**
+
 | Atributo | Tipo | Observação |
-|---|---|---|
+| --- | --- | --- |
 | **id_funcionario** | Inteiro | Chave Primária |
 | nome | Texto | — |
-| cargo | ENUM | `atendente` ou `cozinheiro` |
-| data_admissao | Data | — |
-| turno | ENUM | `manha`, `tarde`, `noite` — exclusivo do **ATENDENTE** |
-| especialidade | Texto | ex.: grelhados, massas — exclusivo do **COZINHEIRO** |
+| data_adm. | Data | Data de admissão |
 
-> **Especialização (p, d):** no MER de Peter Chen é representada por um triângulo abaixo de FUNCIONARIO com o rótulo `p` (parcial) e `d` (disjunta/exclusiva), com linhas para as subclasses ATENDENTE e COZINHEIRO.
-> **Mapeamento escolhido:** tabela única com colunas extras. Atendente tem `turno` preenchido e `especialidade` = NULL. Cozinheiro tem `especialidade` preenchida e `turno` = NULL.
+**ATENDENTE**
 
-#### PEDIDO
 | Atributo | Tipo | Observação |
-|---|---|---|
+| --- | --- | --- |
+| **id_funcionario** | Inteiro | PK e FK → FUNCIONARIO |
+| turno | Texto | ex.: manha, tarde, noite |
+
+**COZINHEIRO**
+
+| Atributo | Tipo | Observação |
+| --- | --- | --- |
+| **id_funcionario** | Inteiro | PK e FK → FUNCIONARIO |
+| especialidade | Texto | ex.: grelhados, massas |
+
+---
+
+### Tabelas de Pedido e Pagamento
+
+**STATUS_PEDIDO**
+
+| Atributo | Tipo | Observação |
+| --- | --- | --- |
+| **id_status_pedido** | Inteiro | Chave Primária |
+| descricao | Texto | ex.: aguardando, em_preparo, saiu, entregue |
+
+**PEDIDO**
+
+| Atributo | Tipo | Observação |
+| --- | --- | --- |
 | **id_pedido** | Inteiro | Chave Primária |
 | id_cliente | Inteiro | FK → CLIENTE |
 | id_endereco | Inteiro | FK → ENDERECO |
-| id_funcionario | Inteiro | FK → FUNCIONARIO |
+| id_funcionario | Inteiro | FK → ATENDENTE (recebeu o pedido) |
+| id_status_pedido | Inteiro | FK → STATUS_PEDIDO |
 | data_hora | Data/Hora | Momento do pedido |
-| status | ENUM | `aguardando`, `em_preparo`, `saiu`, `entregue`, `cancelado` |
+| descricao | Texto | Observações gerais do pedido |
 | total | Decimal | Valor total do pedido |
 
-#### ITEM_PEDIDO — Entidade Fraca
+**ITEM_PEDIDO**
+
 | Atributo | Tipo | Observação |
-|---|---|---|
-| **id_pedido** | Inteiro | FK → PEDIDO (parte da PK composta) |
-| **id_produto** | Inteiro | FK → PRODUTO (parte da PK composta) |
+| --- | --- | --- |
+| **id_pedido** | Inteiro | PK Composta e FK → PEDIDO |
+| **id_produto** | Inteiro | PK Composta e FK → PRODUTO |
 | quantidade | Inteiro | — |
-| preco_unitario | Decimal | Preço no momento da compra (preservado no histórico) |
-| observacao | Texto | ex.: sem cebola, bem passado |
+| preco_unit. | Decimal | Preço no momento da compra |
+| observacao | Texto | Opcional |
 
-> Chave Primária composta: `(id_pedido, id_produto)`. Depende de PEDIDO para existir — por isso é entidade fraca, representada por retângulo duplo no MER. O relacionamento `contem` é identificador, representado por losango duplo.
+**STATUS_PAGAMENTO**
 
-#### PAGAMENTO
 | Atributo | Tipo | Observação |
-|---|---|---|
+| --- | --- | --- |
+| **id_status_pagamento** | Inteiro | Chave Primária |
+| descricao | Texto | ex.: pendente, confirmado, estornado |
+
+**PAGAMENTO**
+
+| Atributo | Tipo | Observação |
+| --- | --- | --- |
 | **id_pagamento** | Inteiro | Chave Primária |
-| id_pedido | Inteiro | FK → PEDIDO |
-| metodo | ENUM | `pix`, `cartao_credito`, `cartao_debito`, `dinheiro` |
-| status | ENUM | `pendente`, `confirmado`, `estornado` |
+| id_pedido | Inteiro | FK → PEDIDO (UNIQUE) |
+| id_status_pagamento | Inteiro | FK → STATUS_PAGAMENTO |
+| metodo | Texto | ex.: pix, cartao_credito |
 | data_hora | Data/Hora | — |
 | valor | Decimal | — |
 
-#### VEICULO
+---
+
+### Tabelas de Logística e Feedback
+
+**VEICULO**
+
 | Atributo | Tipo | Observação |
-|---|---|---|
+| --- | --- | --- |
 | **id_veiculo** | Inteiro | Chave Primária |
-| tipo | ENUM | `moto`, `bicicleta`, `carro` |
+| tipo | Texto | ex.: moto, bicicleta |
 | placa | Texto | Único |
-| marca | Texto | ex.: Honda, Yamaha |
-| modelo | Texto | ex.: CG 160, Fan 125 |
-| ano | Inteiro | Ano de fabricação |
+| marca | Texto | — |
+| modelo | Texto | — |
+| ano | Inteiro | — |
 
-> VEICULO foi separado de ENTREGADOR a pedido do professor e para evitar dependência transitiva: `id_entregador → id_veiculo → placa` violaria a 3FN.
+**ENTREGADOR**
 
-#### ENTREGADOR
 | Atributo | Tipo | Observação |
-|---|---|---|
+| --- | --- | --- |
 | **id_entregador** | Inteiro | Chave Primária |
 | id_veiculo | Inteiro | FK → VEICULO |
-| nome | Texto | — |
 | cpf | Texto(11) | Único |
-| telefone | Texto | — |
 | disponivel | Booleano | Livre ou em rota |
 
-#### ENTREGA
+**ENTREGA**
+
 | Atributo | Tipo | Observação |
-|---|---|---|
+| --- | --- | --- |
 | **id_entrega** | Inteiro | Chave Primária |
-| id_pedido | Inteiro | FK → PEDIDO |
+| id_pedido | Inteiro | FK → PEDIDO (UNIQUE) |
 | id_entregador | Inteiro | FK → ENTREGADOR |
 | hora_saida | Data/Hora | — |
-| hora_entrega | Data/Hora | — |
-| status | ENUM | `em_rota`, `entregue`, `falhou` |
+| hora_entrega | Data/Hora | Hora de chegada |
+| status_entrega | Texto | ex.: em_rota, concluida |
 
-#### AVALIACAO
+**AVALIACAO**
+
 | Atributo | Tipo | Observação |
-|---|---|---|
+| --- | --- | --- |
 | **id_avaliacao** | Inteiro | Chave Primária |
 | id_cliente | Inteiro | FK → CLIENTE |
-| id_pedido | Inteiro | FK → PEDIDO |
-| nota | Inteiro | 1 a 5 estrelas |
+| id_pedido | Inteiro | FK → PEDIDO (UNIQUE) |
+| nota | Inteiro | 1 a 5 |
 | comentario | Texto | Opcional |
 | data_hora | Data/Hora | — |
 
-> AVALIACAO está vinculada ao PEDIDO (não apenas ao cliente), garantindo que só é possível avaliar um pedido que realmente foi realizado.
-
 ---
+<img width="2164" height="1130" alt="mer" src="https://github.com/user-attachments/assets/972d652d-c827-45d0-b7ae-da13c51e38da" />
 
-## 4. Relacionamentos e Cardinalidades
 
-> Notação: **(mínima, máxima)** conforme padrão Peter Chen / professor Cláudio Aroucha.
-> A cardinalidade é anotada no lado **oposto** da entidade a que se refere.
+## 4. Esquema Relacional Completo
 
-| Relacionamento | Entidade A | Card. A | Card. B | Entidade B | Descrição |
-|---|---|---|---|---|---|
-| possui | CLIENTE | (1,1) | (0,n) | ENDERECO | Um cliente tem zero ou vários endereços |
-| faz | CLIENTE | (1,1) | (0,n) | PEDIDO | Um cliente faz zero ou vários pedidos |
-| usado_em | ENDERECO | (0,n) | (1,1) | PEDIDO | Um endereço pode ser usado em vários pedidos |
-| atende | FUNCIONARIO | (0,n) | (1,1) | PEDIDO | Um funcionário atende vários pedidos |
-| agrupa | CATEGORIA | (0,n) | (1,1) | PRODUTO | Uma categoria agrupa vários produtos |
-| **contem** | PEDIDO | (1,n) | (1,1) | ITEM_PEDIDO | Um pedido contém um ou vários itens **(identificador — losango duplo)** |
-| comp_por | PRODUTO | (0,n) | (1,1) | ITEM_PEDIDO | Um produto compõe vários itens de pedido |
-| gera | PEDIDO | (1,1) | (1,1) | PAGAMENTO | Cada pedido gera exatamente um pagamento |
-| origina | PEDIDO | (1,1) | (1,1) | ENTREGA | Cada pedido origina exatamente uma entrega |
-| usa | ENTREGADOR | (1,1) | (0,n) | VEICULO | Um entregador usa um veículo; um veículo pode ser de vários entregadores |
-| realiza | ENTREGADOR | (0,n) | (1,1) | ENTREGA | Um entregador realiza várias entregas |
-| registra | CLIENTE | (0,n) | (1,1) | AVALIACAO | Um cliente registra zero ou várias avaliações |
-| avalia | PEDIDO | (0,1) | (1,1) | AVALIACAO | Um pedido pode ter zero ou uma avaliação |
-
-## MER
-<img width="2071" height="1522" alt="mer_restaurante_delivery (2)" src="https://github.com/user-attachments/assets/54f8492d-3c18-4160-aaaf-448b8034a4e3" />
-
----
-
-## 5. Mapeamento MER para Modelo Relacional
-> - Entidade forte → tabela própria
-> - Entidade fraca → tabela com PK composta
-> - Relacionamento 1:1 → FK incorporada no lado participante
-> - Relacionamento 1:N → FK no lado N
-> - Relacionamento N:N → tabela própria (ITEM_PEDIDO)
-> - Atributo multivalorado → tabela separada (CLIENTE_TELEFONE)
-> - Especialização (p,d) → tabela única com colunas extras nulas
-
-```
-CLIENTE(id_cliente, nome, email, cpf, data_cadastro)
-PK (id_cliente)
+```sql
+CLIENTE(id_cliente, nome, email, cpf, data_cad.)
+  PK (id_cliente)
 
 CLIENTE_TELEFONE(id_cliente, telefone)
-PK (id_cliente, telefone)
-FK (id_cliente) referencia CLIENTE
+  PK (id_cliente, telefone)
+  FK (id_cliente) → CLIENTE
 
-ENDERECO(id_endereco, id_cliente, rua, numero, bairro, cidade, cep, complemento)
-PK (id_endereco)
-FK (id_cliente) referencia CLIENTE
+ENDERECO(id_endereco, id_cliente, logradouro, numero, complement., bairro, cep)
+  PK (id_endereco)
+  FK (id_cliente) → CLIENTE
 
 CATEGORIA(id_categoria, nome, descricao)
-PK (id_categoria)
+  PK (id_categoria)
 
 PRODUTO(id_produto, id_categoria, nome, descricao, preco, disponivel)
-PK (id_produto)
-FK (id_categoria) referencia CATEGORIA
+  PK (id_produto)
+  FK (id_categoria) → CATEGORIA
 
-FUNCIONARIO(id_funcionario, nome, cargo, data_admissao, turno, especialidade)
-PK (id_funcionario)
--- turno: preenchido para atendente, NULL para cozinheiro
--- especialidade: preenchida para cozinheiro, NULL para atendente
+FUNCIONARIO(id_funcionario, nome, data_adm.)
+  PK (id_funcionario)
 
-PEDIDO(id_pedido, id_cliente, id_endereco, id_funcionario, data_hora, status, total)
-PK (id_pedido)
-FK (id_cliente)     referencia CLIENTE
-FK (id_endereco)    referencia ENDERECO
-FK (id_funcionario) referencia FUNCIONARIO
+ATENDENTE(id_funcionario, turno)
+  PK (id_funcionario)
+  FK (id_funcionario) → FUNCIONARIO
 
-ITEM_PEDIDO(id_pedido, id_produto, quantidade, preco_unitario, observacao)
-PK (id_pedido, id_produto)
-FK (id_pedido)  referencia PEDIDO
-FK (id_produto) referencia PRODUTO
+COZINHEIRO(id_funcionario, especialidade)
+  PK (id_funcionario)
+  FK (id_funcionario) → FUNCIONARIO
 
-PAGAMENTO(id_pagamento, id_pedido, metodo, status, data_hora, valor)
-PK (id_pagamento)
-FK (id_pedido) referencia PEDIDO
+STATUS_PEDIDO(id_status_pedido, descricao)
+  PK (id_status_pedido)
+
+PEDIDO(id_pedido, id_cliente, id_endereco, id_funcionario, id_status_pedido, data_hora, descricao, total)
+  PK (id_pedido)
+  FK (id_cliente)      → CLIENTE
+  FK (id_endereco)     → ENDERECO
+  FK (id_funcionario)  → ATENDENTE
+  FK (id_status_pedido)→ STATUS_PEDIDO
+
+ITEM_PEDIDO(id_pedido, id_produto, quantidade, preco_unit., observacao)
+  PK (id_pedido, id_produto)
+  FK (id_pedido)  → PEDIDO
+  FK (id_produto) → PRODUTO
+
+STATUS_PAGAMENTO(id_status_pagamento, descricao)
+  PK (id_status_pagamento)
+
+PAGAMENTO(id_pagamento, id_pedido, id_status_pagamento, metodo, data_hora, valor)
+  PK (id_pagamento)
+  FK (id_pedido)           → PEDIDO
+  FK (id_status_pagamento) → STATUS_PAGAMENTO
+  UNIQUE (id_pedido)
 
 VEICULO(id_veiculo, tipo, placa, marca, modelo, ano)
-PK (id_veiculo)
+  PK (id_veiculo)
+  UNIQUE (placa)
 
-ENTREGADOR(id_entregador, id_veiculo, nome, cpf, telefone, disponivel)
-PK (id_entregador)
-FK (id_veiculo) referencia VEICULO
+ENTREGADOR(id_entregador, id_veiculo, cpf, disponivel)
+  PK (id_entregador)
+  FK (id_veiculo) → VEICULO
 
-ENTREGA(id_entrega, id_pedido, id_entregador, hora_saida, hora_entrega, status)
-PK (id_entrega)
-FK (id_pedido)     referencia PEDIDO
-FK (id_entregador) referencia ENTREGADOR
+ENTREGA(id_entrega, id_pedido, id_entregador, hora_saida, hora_entrega, status_entrega)
+  PK (id_entrega)
+  FK (id_pedido)     → PEDIDO
+  FK (id_entregador) → ENTREGADOR
+  UNIQUE (id_pedido)
 
 AVALIACAO(id_avaliacao, id_cliente, id_pedido, nota, comentario, data_hora)
-PK (id_avaliacao)
-FK (id_cliente) referencia CLIENTE
-FK (id_pedido)  referencia PEDIDO
+  PK (id_avaliacao)
+  FK (id_cliente) → CLIENTE
+  FK (id_pedido)  → PEDIDO
+  UNIQUE (id_pedido)
+
 ```
 
 ---
 
-## 6. Normalização até a 3ª Forma Normal (3FN)
+## 5. Normalização até a 3ª Forma Normal (3FN)
 
-### 6.1 Primeira Forma Normal (1FN)
+### 5.1 Primeira Forma Normal (1FN)
 
-**Definição:** Todos os atributos são atômicos (indivisíveis) e não existem grupos repetitivos.
+Para garantir atributos atômicos e a ausência de grupos repetitivos:
 
-**O que foi feito para garantir a 1FN:**
+* O atributo composto `endereço` foi decomposto em colunas atômicas na tabela `ENDERECO`.
+* O atributo multivalorado `telefone` foi alocado em uma tabela dedicada (`CLIENTE_TELEFONE`).
+* Todos os registros possuem chave primária.
 
-O atributo composto `endereco` foi decomposto em `rua`, `numero`, `bairro`, `cidade`, `cep` e `complemento`. Sem essa decomposição, o atributo guardaria um texto único como "Rua das Flores, 10, Centro" — não atômico.
+### 5.2 Segunda Forma Normal (2FN)
 
-O atributo multivalorado `telefone` do CLIENTE foi separado na tabela `CLIENTE_TELEFONE(id_cliente, telefone)`. Sem essa separação, seria necessário criar colunas repetidas como `telefone1`, `telefone2` — o que viola a 1FN.
+Aplica-se às tabelas com PK composta (`ITEM_PEDIDO`). Todos os atributos não-chave (`quantidade`, `preco_unit.`, `observacao`) dependem da combinação total da chave `(id_pedido, id_produto)`. Não há dependência de apenas uma parte da chave.
 
-Os produtos de um pedido não estão em colunas repetidas dentro de PEDIDO. Cada produto está registrado como uma linha em `ITEM_PEDIDO` — sem grupos repetitivos.
+### 5.3 Terceira Forma Normal (3FN)
 
-Todas as tabelas possuem chave primária definida.
+Para eliminar dependências transitivas e garantir integridade de domínio:
 
-**Conclusão: todas as tabelas estão em 1FN.**
+* **Status Isolados:** A criação de `STATUS_PEDIDO` e `STATUS_PAGAMENTO` remove a vulnerabilidade de inconsistência de texto livre ou falhas em ENUMs rígidos. O status depende exclusivamente da sua chave de domínio.
+* **Especialização (Tabelas Separadas):** Os dados específicos de `ATENDENTE` e `COZINHEIRO` foram separados em tabelas próprias. Isso evita a existência de colunas com valores nulos constantes na tabela genérica de `FUNCIONARIO`, respeitando puramente o conceito relacional.
+* **Veículo:** Os dados do veículo continuam em uma tabela forte separada, evitando a dependência `id_entregador → id_veiculo → placa`.
 
----
-
-### 6.2 Segunda Forma Normal (2FN)
-
-**Definição:** Estar em 1FN e todos os atributos não-chave dependerem totalmente da chave primária. Aplica-se apenas a tabelas com chave primária composta.
-
-**Tabela com chave composta: ITEM_PEDIDO(id_pedido, id_produto)**
-
-| Atributo | Depende só de id_pedido? | Depende só de id_produto? | Depende dos dois? |
-|---|---|---|---|
-| quantidade | Não | Não | Sim |
-| preco_unitario | Não | Não | Sim |
-| observacao | Não | Não | Sim |
-
-Todos os atributos dependem do par completo `(id_pedido, id_produto)`. Não há dependência parcial.
-
-**Tabela com chave composta: CLIENTE_TELEFONE(id_cliente, telefone)**
-
-Não possui atributos além da própria PK. Sem risco de dependência parcial.
-
-**Conclusão: todas as tabelas estão em 2FN.**
+> **Conclusão:** O esquema de 17 tabelas atende plenamente aos requisitos da Terceira Forma Normal (3FN).
 
 ---
 
-### 6.3 Terceira Forma Normal (3FN)
-
-**Definição:** Estar em 2FN e não haver dependências transitivas — nenhum atributo não-chave depende de outro atributo não-chave.
-
-**Exemplos de dependências transitivas que foram evitadas:**
-
-*PRODUTO:* Se `nome_categoria` estivesse dentro de PRODUTO, teríamos `id_produto → id_categoria → nome_categoria`. Solução: `nome_categoria` está em CATEGORIA, referenciada por FK.
-
-*PEDIDO:* Se `nome_cliente` estivesse em PEDIDO, teríamos `id_pedido → id_cliente → nome_cliente`. Solução: dados do cliente estão em CLIENTE.
-
-*ENTREGADOR:* Se `placa` e `tipo` do veículo estivessem em ENTREGADOR, teríamos `id_entregador → id_veiculo → placa`. Solução: dados do veículo estão em VEICULO, entidade própria — exatamente o que o professor pediu.
-
-**Verificação de todas as tabelas:**
-
-| Tabela | Dependência transitiva? | Situação |
-|---|---|---|
-| CLIENTE | Nenhuma | Em 3FN |
-| CLIENTE_TELEFONE | Nenhuma | Em 3FN |
-| ENDERECO | Nenhuma | Em 3FN |
-| CATEGORIA | Nenhuma | Em 3FN |
-| PRODUTO | Nenhuma | Em 3FN |
-| FUNCIONARIO | Nenhuma | Em 3FN |
-| PEDIDO | Nenhuma | Em 3FN |
-| ITEM_PEDIDO | Nenhuma | Em 3FN |
-| PAGAMENTO | Nenhuma | Em 3FN |
-| VEICULO | Nenhuma | Em 3FN |
-| ENTREGADOR | Nenhuma | Em 3FN |
-| ENTREGA | Nenhuma | Em 3FN |
-| AVALIACAO | Nenhuma | Em 3FN |
-
-**Conclusão: todas as tabelas estão em 3FN.**
-
----
-
-## 7. Resumo Final do Modelo
-
-### Tabelas geradas (13 no total)
-
-| # | Tabela | Origem no MER | Chave Primária |
-|---|---|---|---|
-| 1 | CLIENTE | Entidade forte | id_cliente |
-| 2 | CLIENTE_TELEFONE | Atributo multivalorado | (id_cliente, telefone) |
-| 3 | ENDERECO | Entidade forte | id_endereco |
-| 4 | CATEGORIA | Entidade forte | id_categoria |
-| 5 | PRODUTO | Entidade forte | id_produto |
-| 6 | FUNCIONARIO | Entidade forte + especialização (p,d) | id_funcionario |
-| 7 | PEDIDO | Entidade forte | id_pedido |
-| 8 | ITEM_PEDIDO | Entidade fraca / relac. N:N | (id_pedido, id_produto) |
-| 9 | PAGAMENTO | Entidade forte | id_pagamento |
-| 10 | VEICULO | Entidade forte | id_veiculo |
-| 11 | ENTREGADOR | Entidade forte | id_entregador |
-| 12 | ENTREGA | Entidade forte | id_entrega |
-| 13 | AVALIACAO | Entidade forte | id_avaliacao |
-
-### Justificativa de cada decisão de projeto
+## 6. Justificativas das Decisões de Projeto
 
 | Decisão | Justificativa |
-|---|---|
-| ITEM_PEDIDO como entidade fraca | Relação N:N entre PEDIDO e PRODUTO com atributos próprios (qtd, preco, obs) |
-| CLIENTE_TELEFONE separada | Atributo multivalorado exige tabela própria — regra de mapeamento + 1FN |
-| VEICULO como entidade separada | Evita dependência transitiva em ENTREGADOR; pedido explícito do professor |
-| AVALIACAO ligada ao PEDIDO | Garante que só é possível avaliar um pedido realmente realizado |
-| preco_unitario em ITEM_PEDIDO | O preço do produto pode mudar; o preço da compra deve ser preservado |
-| FUNCIONARIO tabela única | Especialização (p,d) mapeada por tabela única com colunas extras nulas — mais simples para consultas |
-
-### Especialização de FUNCIONARIO — resumo visual
-
-```
-              FUNCIONARIO
-            (id_func, nome, cargo, data_admissao, turno, especialidade)
-                     |
-               [p, d] triangulo
-              /               \
-        ATENDENTE          COZINHEIRO
-     (turno preenchido)  (especialidade preenchida)
-     (especialidade=NULL)   (turno=NULL)
-```
+| --- | --- |
+| Especialização em 3 tabelas | Uma tabela genérica (`FUNCIONARIO`) e duas específicas (`ATENDENTE` e `COZINHEIRO`) resolvem a herança (t,d) sem gerar valores nulos. Facilita manutenções exclusivas de escopo de cargo. |
+| Tabelas de Status | Isolar `STATUS_PEDIDO` e `STATUS_PAGAMENTO` permite a inclusão de novos status futuros sem necessidade de comandos de alteração estrutural (ALTER TABLE) no banco, melhorando a escabilidade. |
+| ITEM_PEDIDO como entidade fraca | Resolve a relação N:N entre PEDIDO e PRODUTO, armazenando o preço histórico da compra, desvinculado de flutuações futuras no cardápio. |
+| UNIQUE em id_pedido | Aplicado em PAGAMENTO, ENTREGA e AVALIACAO. Implementa fisicamente a restrição de cardinalidade máxima 1, evitando duplicações lógicas no ciclo de vida do pedido. |
 
 ---
 
