@@ -48,21 +48,21 @@ O sistema de banco de dados tem como objetivo gerenciar as operações de um **�
 ---
 
 
-## 1.1 Modelagem entidade Relacionamento
-Visão geral
+## 2 Modelagem Entidade Relacionamento - MER
+### Visão geral: 
+  <img width="2164" height="1131" alt="Diagrama sem nome" src="https://github.com/user-attachments/assets/8d2a44cb-e7c8-41c6-bdf4-0e1584fb01a4" />
 
+### Produtos -> Pedido
+<img width="742" height="948" alt="Diagrama sem nome (3)" src="https://github.com/user-attachments/assets/1475c6a3-add7-4339-b9c9-09b21365dba5" />
 
-Pedido
+### Funcionários -> pedidos 
+<img width="1250" height="950" alt="func (1)" src="https://github.com/user-attachments/assets/28cf65b0-fbb5-40f1-a72f-13bc1363017b" />
 
+### Cliente, Avaliação, pagamento, Pedido
+<img width="1147" height="806" alt="Diagrama sem nome (4)" src="https://github.com/user-attachments/assets/56e7056f-5dd8-4e61-ac6f-81d0dbc4de16" />
 
-Funcionário
-
-
-Cliente
-
-
-
-2. Modelo Relacional
+---
+## 2. Modelo Relacional
 
 Transformando do modelo entidade relacionamento para o modelo relacional.
 
@@ -80,6 +80,11 @@ PK (id_categ)
 Produto (id_prod, nome, descricao, preco, disponivel, id_categ)
 PK (id_prod)
 FK (id_categ) referencia Categoria
+
+cliente_pedido(id_cliente, id_pedido)
+PK (id_cliente, id_pedido)
+FK (id_cliente) referencia Cliente
+FK (id_pedido) referencia Pedido
 
 Pedido (id_pedido, status_pedido, data_hora, descricao, id_cliente)
 PK (id_pedido)
@@ -137,10 +142,10 @@ PK (id_func_cozinheiro, id_pedido)
 FK (id_func_cozinheiro) referencia Cozinheiro
 FK (id_pedido) referencia Pedido
 ```
+---
+## 3. Normalização. O que foi normalizado?
 
-3. Normalização. O que foi normalizado?
-
-O modelo relacional gerado a partir do diagrama está normalizado até a **3ª Forma Normal (3FN)**, considerando as informações e a estrutura que foram fornecidas no modelo conceitual.
+O modelo relacional gerado a partir do diagrama está normalizado até a **3ª Forma Normal (3FN)**
 
 ### 1. Primeira Forma Normal (1FN)
 **Regra:** Todos os atributos devem ser atômicos (indivisíveis) e não podem existir atributos multivalorados ou grupos repetitivos.
