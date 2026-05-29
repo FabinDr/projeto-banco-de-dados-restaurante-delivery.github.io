@@ -1,3 +1,4 @@
+
 # Projeto I — Banco de Dados
 
 ## Sistema: Restaurante Delivery
@@ -46,314 +47,114 @@ O sistema de banco de dados tem como objetivo gerenciar as operações de um **�
 
 ---
 
+
 ## 1.1 Modelagem entidade Relacionamento
+Visão geral
 
-<img width="2164" height="1130" alt="mer" src="https://github.com/user-attachments/assets/d9e16f1d-72e6-46c1-bf90-60f8a118db95" />
 
----
-## 2. Esquema Relacional Completo
+Pedido
+
+
+Funcionário
+
+
+Cliente
+
+
+
+2. Modelo Relacional
+
+Transformando do modelo entidade relacionamento para o modelo relacional.
 
 ```sql
-CLIENTE(id_cliente, nome, email, cpf, data_cad.)
-  PK (id_cliente)
+Cliente(id_cliente, nome, email, CPF, data_cad, logradouro, numero, bairro, CEP, complemento)
+PK (id_cliente)
 
-CLIENTE_TELEFONE(id_cliente, telefone)
-  PK (id_cliente, telefone)
-  FK (id_cliente) → CLIENTE
+Telefone_Cliente(id_cliente, telefone)
+PK (id_cliente, telefone)
+FK (id_cliente) referencia Cliente
 
-ENDERECO(id_endereco, id_cliente, logradouro, numero, complement., bairro, cep)
-  PK (id_endereco)
-  FK (id_cliente) → CLIENTE
+Categoria (id_categ, nome, descricao)
+PK (id_categ)
 
-CATEGORIA(id_categoria, nome, descricao)
-  PK (id_categoria)
+Produto (id_prod, nome, descricao, preco, disponivel, id_categ)
+PK (id_prod)
+FK (id_categ) referencia Categoria
 
-PRODUTO(id_produto, id_categoria, nome, descricao, preco, disponivel)
-  PK (id_produto)
-  FK (id_categoria) → CATEGORIA
+Pedido (id_pedido, status_pedido, data_hora, descricao, id_cliente)
+PK (id_pedido)
+FK (id_cliente) referencia Cliente
 
-FUNCIONARIO(id_funcionario, nome, data_adm.)
-  PK (id_funcionario)
+Item_Pedido (id_item_ped, quantidade, preco_unit, observacao, id_pedido, id_prod)
+PK (id_item_ped)
+FK (id_pedido) referencia Pedido
+FK (id_prod) referencia Produto
 
-ATENDENTE(id_funcionario, turno)
-  PK (id_funcionario)
-  FK (id_funcionario) → FUNCIONARIO
+Pagamento(id_pagamento, metodo, status_pagamento, valor, data_hora, id_pedido)
+PK (id_pagamento)
+FK (id_pedido) referencia Pedido
 
-COZINHEIRO(id_funcionario, especialidade)
-  PK (id_funcionario)
-  FK (id_funcionario) → FUNCIONARIO
+Avaliacao(id_aval, nota, comentario, data_hora, id_cliente, id_pedido)
+PK (id_aval)
+FK (id_cliente) referencia Cliente
+FK (id_pedido) referencia Pedido
 
-STATUS_PEDIDO(id_status_pedido, descricao)
-  PK (id_status_pedido)
+Funcionario(id_func, nome, cargo, data_adm, cpf)
+PK (id_func)
 
-PEDIDO(id_pedido, id_cliente, id_endereco, id_funcionario, id_status_pedido, data_hora, descricao, total)
-  PK (id_pedido)
-  FK (id_cliente)      → CLIENTE
-  FK (id_endereco)     → ENDERECO
-  FK (id_funcionario)  → ATENDENTE
-  FK (id_status_pedido)→ STATUS_PEDIDO
+Telefone_Funcionario (id_func, telefone)
+PK (id_func, telefone)
+FK (id_func) referencia Funcionario
 
-ITEM_PEDIDO(id_pedido, id_produto, quantidade, preco_unit., observacao)
-  PK (id_pedido, id_produto)
-  FK (id_pedido)  → PEDIDO
-  FK (id_produto) → PRODUTO
+Atendente (id_func, turno)
+PK (id_func)
+FK (id_func) referencia Funcionario
 
-STATUS_PAGAMENTO(id_status_pagamento, descricao)
-  PK (id_status_pagamento)
+Cozinheiro (id_func, especialidade)
+PK (id_func)
+FK (id_func) referencia Funcionario
 
-PAGAMENTO(id_pagamento, id_pedido, id_status_pagamento, metodo, data_hora, valor)
-  PK (id_pagamento)
-  FK (id_pedido)           → PEDIDO
-  FK (id_status_pagamento) → STATUS_PAGAMENTO
+Entregador(id_func, disponivel)
+PK (id_func)
+FK (id_func) referencia Funcionario
 
-VEICULO(id_veiculo, tipo, placa, marca, modelo, ano)
-  PK (id_veiculo)
+Veiculo(id_veiculo, tipo, placa, marca, modelo, ano, id_func_entregador)
+PK (id_veiculo)
+FK (id_func_entregador) referencia Entregador
 
-ENTREGADOR(id_entregador, id_veiculo, cpf, disponivel)
-  PK (id_entregador)
-  FK (id_veiculo) → VEICULO
+Entrega(id_entrega, hora_saida, hora_entrega, status_entrega, id_pedido, id_func_entregador)
+PK (id_entrega)
+FK (id_pedido) referencia Pedido
+FK (id_func_entregador) referencia Entregador
 
-ENTREGA(id_entrega, id_pedido, id_entregador, hora_saida, hora_entrega, status_entrega)
-  PK (id_entrega)
-  FK (id_pedido)     → PEDIDO
-  FK (id_entregador) → ENTREGADOR
+Atende_Atendente(id_func_atendente, id_pedido)
+PK (id_func_atendente, id_pedido)
+FK (id_func_atendente) referencia Atendente
+FK (id_pedido) referencia Pedido
 
-AVALIACAO(id_avaliacao, id_cliente, id_pedido, nota, comentario, data_hora)
-  PK (id_avaliacao)
-  FK (id_cliente) → CLIENTE
-  FK (id_pedido)  → PEDIDO
-
+Prepara_Cozinheiro(id_func_cozinheiro, id_pedido)
+PK (id_func_cozinheiro, id_pedido)
+FK (id_func_cozinheiro) referencia Cozinheiro
+FK (id_pedido) referencia Pedido
 ```
 
----
-## 3. Normalização até a 3ª Forma Normal (3FN)
+3. Normalização. O que foi normalizado?
 
-### 3.1 Primeira Forma Normal (1FN)
+O modelo relacional gerado a partir do diagrama está normalizado até a **3ª Forma Normal (3FN)**, considerando as informações e a estrutura que foram fornecidas no modelo conceitual.
 
-Para garantir atributos atômicos e a ausência de grupos repetitivos:
-
-* O atributo composto `endereço` foi decomposto em colunas atômicas na tabela `ENDERECO`.
-* O atributo multivalorado `telefone` foi alocado em uma tabela dedicada (`CLIENTE_TELEFONE`).
-* Todos os registros possuem chave primária.
-
-### 3.2 Segunda Forma Normal (2FN)
-
-Aplica-se às tabelas com PK composta (`ITEM_PEDIDO`). Todos os atributos não-chave (`quantidade`, `preco_unit.`, `observacao`) dependem da combinação total da chave `(id_pedido, id_produto)`. Não há dependência de apenas uma parte da chave.
-
-### 3.3 Terceira Forma Normal (3FN)
-
-Para eliminar dependências transitivas e garantir integridade de domínio:
-
-* **Status Isolados:** A criação de `STATUS_PEDIDO` e `STATUS_PAGAMENTO` remove a vulnerabilidade de inconsistência de texto livre ou falhas em ENUMs rígidos. O status depende exclusivamente da sua chave de domínio.
-* **Especialização (Tabelas Separadas):** Os dados específicos de `ATENDENTE` e `COZINHEIRO` foram separados em tabelas próprias. Isso evita a existência de colunas com valores nulos constantes na tabela genérica de `FUNCIONARIO`, respeitando puramente o conceito relacional.
-* **Veículo:** Os dados do veículo continuam em uma tabela forte separada, evitando a dependência `id_entregador → id_veiculo → placa`.
-
-> **Conclusão:** O esquema de 17 tabelas atende plenamente aos requisitos da Terceira Forma Normal (3FN).
-
----
-
-## 4. Entidades
-
-O modelo relacional final é composto por **17 tabelas** para garantir a adequada normalização e mapeamento correto das entidades e atributos do MER.
-
-| # | Tabela | Tipo | O que representa |
-| --- | --- | --- | --- |
-| 1 | CLIENTE | Forte | Pessoa que realiza pedidos no restaurante |
-| 2 | CLIENTE_TELEFONE | Multivalorado | Telefones de contato do cliente |
-| 3 | ENDERECO | Forte | Endereços de entrega cadastrados pelo cliente |
-| 4 | CATEGORIA | Forte | Categoria dos produtos do cardápio |
-| 5 | PRODUTO | Forte | Item disponível no cardápio |
-| 6 | FUNCIONARIO | Forte | Entidade genérica de funcionários internos |
-| 7 | ATENDENTE | Subclasse | Funcionário especializado no atendimento |
-| 8 | COZINHEIRO | Subclasse | Funcionário especializado no preparo |
-| 9 | STATUS_PEDIDO | Domínio | Catálogo de estados possíveis para um pedido |
-| 10 | PEDIDO | Forte | Pedido realizado por um cliente |
-| 11 | ITEM_PEDIDO | Fraca | Produto dentro de um pedido |
-| 12 | STATUS_PAGAMENTO | Domínio | Catálogo de estados possíveis para um pagamento |
-| 13 | PAGAMENTO | Fraca | Registro de pagamento de um pedido |
-| 14 | VEICULO | Forte | Veículo utilizado pelo entregador nas entregas |
-| 15 | ENTREGADOR | Forte | Responsável por realizar as entregas |
-| 16 | ENTREGA | Forte | Registro da operação de entrega |
-| 17 | AVALIACAO | Forte | Avaliação do cliente sobre o pedido recebido |
-
----
-
-## 5. Atributos por Tabela
-
-### Tabelas de Cliente e Endereço
-
-**CLIENTE**
-
-| Atributo | Tipo | Observação |
-| --- | --- | --- |
-| **id_cliente** | Inteiro | Chave Primária |
-| nome | Texto | — |
-| email | Texto | Único |
-| cpf | Texto(11) | Único |
-| data_cad. | Data | Data de cadastro |
-
-**CLIENTE_TELEFONE**
-
-| Atributo | Tipo | Observação |
-| --- | --- | --- |
-| **id_cliente** | Inteiro | PK Composta e FK → CLIENTE |
-| **telefone** | Texto | PK Composta |
-
-**ENDERECO**
-
-| Atributo | Tipo | Observação |
-| --- | --- | --- |
-| **id_endereco** | Inteiro | Chave Primária |
-| id_cliente | Inteiro | FK → CLIENTE |
-| logradouro | Texto | — |
-| numero | Texto | — |
-| complement. | Texto | — |
-| bairro | Texto | — |
-| cep | Texto | — |
-
----
-
-### Tabelas de Produto e Categoria
-
-**CATEGORIA**
-
-| Atributo | Tipo | Observação |
-| --- | --- | --- |
-| **id_categoria** | Inteiro | Chave Primária |
-| nome | Texto | ex.: Lanches, Bebidas |
-| descricao | Texto | — |
-
-**PRODUTO**
-
-| Atributo | Tipo | Observação |
-| --- | --- | --- |
-| **id_produto** | Inteiro | Chave Primária |
-| id_categoria | Inteiro | FK → CATEGORIA |
-| nome | Texto | — |
-| descricao | Texto | — |
-| preco | Decimal | — |
-| disponivel | Booleano | Ativo/inativo no cardápio |
-
----
-
-### Tabelas de Funcionários (Especialização)
-
-**FUNCIONARIO**
-
-| Atributo | Tipo | Observação |
-| --- | --- | --- |
-| **id_funcionario** | Inteiro | Chave Primária |
-| nome | Texto | — |
-| data_adm. | Data | Data de admissão |
-
-**ATENDENTE**
-
-| Atributo | Tipo | Observação |
-| --- | --- | --- |
-| **id_funcionario** | Inteiro | PK e FK → FUNCIONARIO |
-| turno | Texto | ex.: manha, tarde, noite |
-
-**COZINHEIRO**
-
-| Atributo | Tipo | Observação |
-| --- | --- | --- |
-| **id_funcionario** | Inteiro | PK e FK → FUNCIONARIO |
-| especialidade | Texto | ex.: grelhados, massas |
-
----
-
-### Tabelas de Pedido e Pagamento
-
-**STATUS_PEDIDO**
-
-| Atributo | Tipo | Observação |
-| --- | --- | --- |
-| **id_status_pedido** | Inteiro | Chave Primária |
-| descricao | Texto | ex.: aguardando, em_preparo, saiu, entregue |
-
-**PEDIDO**
-
-| Atributo | Tipo | Observação |
-| --- | --- | --- |
-| **id_pedido** | Inteiro | Chave Primária |
-| id_cliente | Inteiro | FK → CLIENTE |
-| id_endereco | Inteiro | FK → ENDERECO |
-| id_funcionario | Inteiro | FK → ATENDENTE (recebeu o pedido) |
-| id_status_pedido | Inteiro | FK → STATUS_PEDIDO |
-| data_hora | Data/Hora | Momento do pedido |
-| descricao | Texto | Observações gerais do pedido |
-| total | Decimal | Valor total do pedido |
-
-**ITEM_PEDIDO**
-
-| Atributo | Tipo | Observação |
-| --- | --- | --- |
-| **id_pedido** | Inteiro | PK Composta e FK → PEDIDO |
-| **id_produto** | Inteiro | PK Composta e FK → PRODUTO |
-| quantidade | Inteiro | — |
-| preco_unit. | Decimal | Preço no momento da compra |
-| observacao | Texto | Opcional |
-
-**STATUS_PAGAMENTO**
-
-| Atributo | Tipo | Observação |
-| --- | --- | --- |
-| **id_status_pagamento** | Inteiro | Chave Primária |
-| descricao | Texto | ex.: pendente, confirmado, estornado |
-
-**PAGAMENTO**
-
-| Atributo | Tipo | Observação |
-| --- | --- | --- |
-| **id_pagamento** | Inteiro | Chave Primária |
-| id_pedido | Inteiro | FK → PEDIDO (UNIQUE) |
-| id_status_pagamento | Inteiro | FK → STATUS_PAGAMENTO |
-| metodo | Texto | ex.: pix, cartao_credito |
-| data_hora | Data/Hora | — |
-| valor | Decimal | — |
-
----
-
-### Tabelas de Logística e Feedback
-
-**VEICULO**
-
-| Atributo | Tipo | Observação |
-| --- | --- | --- |
-| **id_veiculo** | Inteiro | Chave Primária |
-| tipo | Texto | ex.: moto, bicicleta |
-| placa | Texto | Único |
-| marca | Texto | — |
-| modelo | Texto | — |
-| ano | Inteiro | — |
-
-**ENTREGADOR**
-
-| Atributo | Tipo | Observação |
-| --- | --- | --- |
-| **id_entregador** | Inteiro | Chave Primária |
-| id_veiculo | Inteiro | FK → VEICULO |
-| cpf | Texto(11) | Único |
-| disponivel | Booleano | Livre ou em rota |
-
-**ENTREGA**
-
-| Atributo | Tipo | Observação |
-| --- | --- | --- |
-| **id_entrega** | Inteiro | Chave Primária |
-| id_pedido | Inteiro | FK → PEDIDO (UNIQUE) |
-| id_entregador | Inteiro | FK → ENTREGADOR |
-| hora_saida | Data/Hora | — |
-| hora_entrega | Data/Hora | Hora de chegada |
-| status_entrega | Texto | ex.: em_rota, concluida |
-
-**AVALIACAO**
-
-| Atributo | Tipo | Observação |
-| --- | --- | --- |
-| **id_avaliacao** | Inteiro | Chave Primária |
-| id_cliente | Inteiro | FK → CLIENTE |
-| id_pedido | Inteiro | FK → PEDIDO (UNIQUE) |
-| nota | Inteiro | 1 a 5 |
-| comentario | Texto | Opcional |
-| data_hora | Data/Hora | — |
+### 1. Primeira Forma Normal (1FN)
+**Regra:** Todos os atributos devem ser atômicos (indivisíveis) e não podem existir atributos multivalorados ou grupos repetitivos.
+ * **Como aplicamos:**
+   * O atributo composto endereço foi "achatado", ou seja, dividido em seus componentes mais simples (logradouro, numero, bairro, CEP, complemento) diretamente na tabela **Cliente**.
+   * Os atributos multivalorados telefone (linha dupla no seu diagrama) foram removidos das tabelas principais e transformados em tabelas próprias (**Telefone_Cliente** e **Telefone_Funcionario**).
+### 2. Segunda Forma Normal (2FN)
+**Regra:** A tabela deve estar na 1FN e todos os atributos não-chave devem depender totalmente da chave primária (não pode haver dependência parcial em tabelas com chaves compostas).
+ * **Como aplicamos:**
+   * A grande maioria das suas tabelas possui uma chave primária simples (composta por apenas um atributo, como id_cliente ou id_pedido). Quando a chave é simples, a tabela já está automaticamente na 2FN, pois é impossível que um atributo dependa apenas de "uma parte" da chave.
+   * As tabelas que possuem chave primária composta (como **Telefone_Cliente**, **Telefone_Funcionario**, **Atende** e **Prepara**) são tabelas puramente associativas ou de armazenamento de valores múltiplos. Elas não possuem atributos não-chave soltos que dependam apenas de metade da chave. Logo, respeitam a 2FN.
+### 3. Terceira Forma Normal (3FN)
+**Regra:** A tabela deve estar na 2FN e não pode haver dependência transitiva. Isso significa que um atributo não-chave não pode depender de outro atributo não-chave; todos devem depender única e exclusivamente da chave primária.
+ * **Como aplicamos:**
+   * Em tabelas como **Pedido**, o status_pedido e a data_hora dependem unicamente do id_pedido. O id_cliente é uma chave estrangeira, o que é perfeitamente válido.
+   * Em **Produto**, o nome, descricao e preco dependem do id_prod.
+   * Em **Item_Pedido**, o preco_unit (preço histórico cobrado naquele pedido) e a quantidade dependem do id_item_ped. Não há atributos calculados ou derivados sendo armazenados de forma redundante.
