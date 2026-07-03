@@ -48,6 +48,23 @@ Entregador N---N Veiculo (via Entregador_veiculo)
 ```
 
 ## ⚙️ Como executar
+Você pode executar os scripts no banco de dados de duas formas: utilizando a interface gráfica de um SGBD ou via linha de comando.
+
+### Opção 1: Manualmente via SGBD (ex: MySQL Workbench)
+
+1. **Abra o SGBD:** Abra o **MySQL Workbench** (ou o SGBD da sua preferência, como DBeaver ou phpMyAdmin) e conecte-se ao seu servidor local.
+2. **Crie o Banco de Dados:** Abra uma nova aba de consulta (*Query Tab*) e execute os seguintes comandos para criar e selecionar o banco:
+```sql
+CREATE DATABASE restaurante_delivery;
+USE restaurante_delivery;
+
+```
+
+3. **Abra o Script Físico:** Vá ao menu superior em **File > Open SQL Script...** (Arquivo > Abrir Script SQL) e selecione o ficheiro `restaurante_delivery.sql`.
+4. **Execute o Script:** Clique no ícone de **Raio** (*Execute*) para rodar os comandos. Isto criará toda a estrutura de tabelas e relacionamentos automaticamente no SGBD.
+5. **Popule os Dados (Opcional):** Para inserir os dados de exemplo e rodar o roteiro de testes, repita o processo: vá a **File > Open SQL Script...**, selecione o ficheiro `mega_insert.sql` e clique novamente no ícone de **Raio** para executar.
+
+### Opção 2: Via Linha de Comando (Terminal)
 
 1. Crie um banco no MySQL:
    ```sql
@@ -60,7 +77,7 @@ Entregador N---N Veiculo (via Entregador_veiculo)
    ```
 3. (Opcional) Popule com dados de exemplo e teste as consultas:
    ```bash
-   mysql -u seu_usuario -p restaurante_delivery < roteiro_apresentacao.sql
+   mysql -u seu_usuario -p restaurante_delivery < mega_insert.sql
    ```
 
 ## 🛠️ Tecnologias
