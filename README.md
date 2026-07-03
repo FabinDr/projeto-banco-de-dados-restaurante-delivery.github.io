@@ -62,7 +62,7 @@ USE restaurante_delivery;
 
 3. **Abra o Script Físico:** Vá ao menu superior em **File > Open SQL Script...** (Arquivo > Abrir Script SQL) e selecione o ficheiro `restaurante_delivery.sql`.
 4. **Execute o Script:** Clique no ícone de **Raio** (*Execute*) para rodar os comandos. Isto criará toda a estrutura de tabelas e relacionamentos automaticamente no SGBD.
-5. **Popule os Dados (Opcional):** Para inserir os dados de exemplo e rodar o roteiro de testes, repita o processo: vá a **File > Open SQL Script...**, selecione o ficheiro `mega_insert.sql` e clique novamente no ícone de **Raio** para executar.
+5. **Popule os Dados (Opcional):** Para inserir os dados de exemplo e rodar o roteiro de testes, repita o processo: vá a **File > Open SQL Script...**, selecione o ficheiro [`mega_insert.sql`](./mega_insert.sql) e clique novamente no ícone de **Raio** para executar.
 
 ### Opção 2: Via Linha de Comando (Terminal)
 
